@@ -1,0 +1,117 @@
+water_delivery_app/
+│
+├── lib/
+│   ├── main.dart
+│   ├── app.dart
+│   │
+│   ├── core/
+│   │   ├── theme/
+│   │   │   └── app_theme.dart
+│   │   ├── constants/
+│   │   │   ├── app_colors.dart
+│   │   │   └── app_strings.dart
+│   │   ├── utils/
+│   │   │   ├── validators.dart
+│   │   │   └── helpers.dart
+│   │   ├── services/
+│   │   │   ├── navigation_service.dart
+│   │   │   └── api_service.dart
+│   │   ├── widgets/
+│   │   │   ├── custom_button.dart
+│   │   │   └── custom_textfield.dart
+│   │   └── helpers/
+│   │
+│   ├── config/
+│   │   ├── routes/
+│   │   ├── app_config.dart
+│   │   └── environment.dart
+│   │
+│   ├── features/
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── screens/
+│   │   │   │   ├── splash_screen.dart
+│   │   │   │   ├── onboarding_screen.dart
+│   │   │   │   ├── language_screen.dart
+│   │   │   │   ├── login_screen.dart
+│   │   │   │   └── register_screen.dart
+│   │   │   ├── controllers/
+│   │   │   ├── models/
+│   │   │   └── services/
+│   │   │
+│   │   ├── customer/
+│   │   │   ├── home/
+│   │   │   │   └── customer_home_screen.dart
+│   │   │   ├── orders/
+│   │   │   │   ├── order_tracking_screen.dart
+│   │   │   │   ├── order_details_screen.dart
+│   │   │   │   └── order_history_screen.dart
+│   │   │   ├── water_selection/
+│   │   │   │   └── water_selection_screen.dart
+│   │   │   ├── checkout/
+│   │   │   │   └── checkout_screen.dart
+│   │   │   ├── location/
+│   │   │   │   ├── map_picker_screen.dart
+│   │   │   │   ├── address_form_screen.dart
+│   │   │   │   └── saved_addresses_screen.dart
+│   │   │   ├── profile/
+│   │   │   │   ├── profile_screen.dart
+│   │   │   │   └── settings_screen.dart
+│   │   │   └── notifications/
+│   │   │       └── notifications_screen.dart
+│   │   │
+│   │   ├── delivery/
+│   │   │   ├── dashboard/
+│   │   │   │   ├── delivery_dashboard_screen.dart
+│   │   │   │   └── online_status_screen.dart
+│   │   │   ├── orders/
+│   │   │   │   ├── incoming_orders_screen.dart
+│   │   │   │   ├── active_delivery_screen.dart
+│   │   │   │   └── delivery_history_screen.dart
+│   │   │   ├── navigation/
+│   │   │   │   ├── map_navigation_screen.dart
+│   │   │   │   └── delivery_details_screen.dart
+│   │   │   ├── earnings/
+│   │   │   │   ├── earnings_screen.dart
+│   │   │   │   ├── withdrawal_screen.dart
+│   │   │   │   └── transactions_screen.dart
+│   │   │   └── profile/
+│   │   │       ├── delivery_profile_screen.dart
+│   │   │       ├── verification_screen.dart
+│   │   │       └── settings_screen.dart
+│   │   │
+│   │   └── admin/
+│   │       ├── dashboard/
+│   │       │   └── admin_dashboard_screen.dart
+│   │       ├── users/
+│   │       │   ├── customers_list_screen.dart
+│   │       │   ├── delivery_list_screen.dart
+│   │       │   └── user_details_screen.dart
+│   │       ├── orders/
+│   │       │   ├── all_orders_screen.dart
+│   │       │   └── order_details_screen.dart
+│   │       ├── zones/
+│   │       │   ├── create_zone_screen.dart
+│   │       │   ├── assign_drivers_screen.dart
+│   │       │   └── zone_map_screen.dart
+│   │       └── payments/
+│   │           ├── transactions_screen.dart
+│   │           └── commission_screen.dart
+│   │
+│   └── shared/
+│       ├── models/
+│       │   ├── user_model.dart
+│       │   ├── order_model.dart
+│       │   └── product_model.dart
+│       ├── enums/
+│       ├── providers/
+│       └── services/
+│
+├── android/
+├── ios/
+├── web/
+├── pubspec.yaml
+├── pubspec.lock
+├── README.md
+├── analysis_options.yaml
+└── .gitignore

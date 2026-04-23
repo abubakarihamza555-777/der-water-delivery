@@ -1,0 +1,385 @@
+Sawa! Nitagawanya **directory structure** kwa **vipande 10**. Kila kipande utakimaliza kabla ya kuendelea na kipande kinachofuata.
+
+---
+
+## 📦 **KIPANDE 1: MWANZO WA PROJECT (Foundation)**
+
+```bash
+# Create Flutter project
+flutter create water_delivery_app
+cd water_delivery_app
+
+# Create root folders
+mkdir lib\core
+mkdir lib\config
+mkdir lib\features
+mkdir lib\shared
+```
+
+**Baada ya kipande hiki, una:**
+```
+water_delivery_app/
+├── lib/
+│   ├── core/
+│   ├── config/
+│   ├── features/
+│   └── shared/
+├── android/
+├── ios/
+└── pubspec.yaml
+```
+
+---
+
+## 📦 **KIPANDE 2: CORE FOLDER NA SUBS**
+
+```bash
+# Core folder structure
+mkdir lib\core\theme
+mkdir lib\core\constants
+mkdir lib\core\utils
+mkdir lib\core\services
+mkdir lib\core\widgets
+mkdir lib\core\helpers
+
+# Create empty files
+echo. > lib\core\theme\app_theme.dart
+echo. > lib\core\constants\app_colors.dart
+echo. > lib\core\constants\app_strings.dart
+echo. > lib\core\utils\validators.dart
+echo. > lib\core\utils\helpers.dart
+echo. > lib\core\services\navigation_service.dart
+echo. > lib\core\services\api_service.dart
+echo. > lib\core\widgets\custom_button.dart
+echo. > lib\core\widgets\custom_textfield.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/core/
+├── theme/
+│   └── app_theme.dart
+├── constants/
+│   ├── app_colors.dart
+│   └── app_strings.dart
+├── utils/
+│   ├── validators.dart
+│   └── helpers.dart
+├── services/
+│   ├── navigation_service.dart
+│   └── api_service.dart
+├── widgets/
+│   ├── custom_button.dart
+│   └── custom_textfield.dart
+└── helpers/
+```
+
+---
+
+## 📦 **KIPANDE 3: CONFIG FOLDER**
+
+```bash
+# Config folder structure
+mkdir lib\config\routes
+
+echo. > lib\config\app_config.dart
+echo. > lib\config\environment.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/config/
+├── routes/
+├── app_config.dart
+└── environment.dart
+```
+
+---
+
+## 📦 **KIPANDE 4: AUTH MODULE (SEHEMU YA KWANZA)**
+
+```bash
+# Auth module
+mkdir lib\features\auth
+mkdir lib\features\auth\screens
+mkdir lib\features\auth\controllers
+mkdir lib\features\auth\models
+mkdir lib\features\auth\services
+
+# Auth screens
+echo. > lib\features\auth\screens\splash_screen.dart
+echo. > lib\features\auth\screens\onboarding_screen.dart
+echo. > lib\features\auth\screens\language_screen.dart
+echo. > lib\features\auth\screens\login_screen.dart
+echo. > lib\features\auth\screens\register_screen.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/features/auth/
+├── screens/
+│   ├── splash_screen.dart
+│   ├── onboarding_screen.dart
+│   ├── language_screen.dart
+│   ├── login_screen.dart
+│   └── register_screen.dart
+├── controllers/
+├── models/
+└── services/
+```
+
+---
+
+## 📦 **KIPANDE 5: CUSTOMER MODULE - HOME & ORDERS**
+
+```bash
+# Customer module folders
+mkdir lib\features\customer
+mkdir lib\features\customer\home
+mkdir lib\features\customer\orders
+mkdir lib\features\customer\water_selection
+mkdir lib\features\customer\checkout
+
+# Customer home & orders
+echo. > lib\features\customer\home\customer_home_screen.dart
+echo. > lib\features\customer\orders\order_tracking_screen.dart
+echo. > lib\features\customer\orders\order_details_screen.dart
+echo. > lib\features\customer\orders\order_history_screen.dart
+echo. > lib\features\customer\water_selection\water_selection_screen.dart
+echo. > lib\features\customer\checkout\checkout_screen.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/features/customer/
+├── home/
+│   └── customer_home_screen.dart
+├── orders/
+│   ├── order_tracking_screen.dart
+│   ├── order_details_screen.dart
+│   └── order_history_screen.dart
+├── water_selection/
+│   └── water_selection_screen.dart
+└── checkout/
+    └── checkout_screen.dart
+```
+
+---
+
+## 📦 **KIPANDE 6: CUSTOMER MODULE - LOCATION & PROFILE**
+
+```bash
+# Customer location & profile
+mkdir lib\features\customer\location
+mkdir lib\features\customer\profile
+mkdir lib\features\customer\notifications
+
+echo. > lib\features\customer\location\map_picker_screen.dart
+echo. > lib\features\customer\location\address_form_screen.dart
+echo. > lib\features\customer\location\saved_addresses_screen.dart
+echo. > lib\features\customer\profile\profile_screen.dart
+echo. > lib\features\customer\profile\settings_screen.dart
+echo. > lib\features\customer\notifications\notifications_screen.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/features/customer/
+├── location/
+│   ├── map_picker_screen.dart
+│   ├── address_form_screen.dart
+│   └── saved_addresses_screen.dart
+├── profile/
+│   ├── profile_screen.dart
+│   └── settings_screen.dart
+└── notifications/
+    └── notifications_screen.dart
+```
+
+---
+
+## 📦 **KIPANDE 7: DELIVERY MODULE - DASHBOARD & ORDERS**
+
+```bash
+# Delivery module
+mkdir lib\features\delivery
+mkdir lib\features\delivery\dashboard
+mkdir lib\features\delivery\orders
+mkdir lib\features\delivery\navigation
+
+echo. > lib\features\delivery\dashboard\delivery_dashboard_screen.dart
+echo. > lib\features\delivery\dashboard\online_status_screen.dart
+echo. > lib\features\delivery\orders\incoming_orders_screen.dart
+echo. > lib\features\delivery\orders\active_delivery_screen.dart
+echo. > lib\features\delivery\orders\delivery_history_screen.dart
+echo. > lib\features\delivery\navigation\map_navigation_screen.dart
+echo. > lib\features\delivery\navigation\delivery_details_screen.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/features/delivery/
+├── dashboard/
+│   ├── delivery_dashboard_screen.dart
+│   └── online_status_screen.dart
+├── orders/
+│   ├── incoming_orders_screen.dart
+│   ├── active_delivery_screen.dart
+│   └── delivery_history_screen.dart
+└── navigation/
+    ├── map_navigation_screen.dart
+    └── delivery_details_screen.dart
+```
+
+---
+
+## 📦 **KIPANDE 8: DELIVERY MODULE - EARNINGS & PROFILE**
+
+```bash
+# Delivery earnings & profile
+mkdir lib\features\delivery\earnings
+mkdir lib\features\delivery\profile
+
+echo. > lib\features\delivery\earnings\earnings_screen.dart
+echo. > lib\features\delivery\earnings\withdrawal_screen.dart
+echo. > lib\features\delivery\earnings\transactions_screen.dart
+echo. > lib\features\delivery\profile\delivery_profile_screen.dart
+echo. > lib\features\delivery\profile\verification_screen.dart
+echo. > lib\features\delivery\profile\settings_screen.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/features/delivery/
+├── earnings/
+│   ├── earnings_screen.dart
+│   ├── withdrawal_screen.dart
+│   └── transactions_screen.dart
+└── profile/
+    ├── delivery_profile_screen.dart
+    ├── verification_screen.dart
+    └── settings_screen.dart
+```
+
+---
+
+## 📦 **KIPANDE 9: ADMIN MODULE**
+
+```bash
+# Admin module
+mkdir lib\features\admin
+mkdir lib\features\admin\dashboard
+mkdir lib\features\admin\users
+mkdir lib\features\admin\orders
+mkdir lib\features\admin\zones
+mkdir lib\features\admin\payments
+
+echo. > lib\features\admin\dashboard\admin_dashboard_screen.dart
+echo. > lib\features\admin\users\customers_list_screen.dart
+echo. > lib\features\admin\users\delivery_list_screen.dart
+echo. > lib\features\admin\users\user_details_screen.dart
+echo. > lib\features\admin\orders\all_orders_screen.dart
+echo. > lib\features\admin\orders\order_details_screen.dart
+echo. > lib\features\admin\zones\create_zone_screen.dart
+echo. > lib\features\admin\zones\assign_drivers_screen.dart
+echo. > lib\features\admin\zones\zone_map_screen.dart
+echo. > lib\features\admin\payments\transactions_screen.dart
+echo. > lib\features\admin\payments\commission_screen.dart
+```
+
+**Baada ya kipande hiki:**
+```
+lib/features/admin/
+├── dashboard/
+│   └── admin_dashboard_screen.dart
+├── users/
+│   ├── customers_list_screen.dart
+│   ├── delivery_list_screen.dart
+│   └── user_details_screen.dart
+├── orders/
+│   ├── all_orders_screen.dart
+│   └── order_details_screen.dart
+├── zones/
+│   ├── create_zone_screen.dart
+│   ├── assign_drivers_screen.dart
+│   └── zone_map_screen.dart
+└── payments/
+    ├── transactions_screen.dart
+    └── commission_screen.dart
+```
+
+---
+
+## 📦 **KIPANDE 10: SHARED FOLDER NA MAIN FILES (MWISHO)**
+
+```bash
+# Shared folder
+mkdir lib\shared\models
+mkdir lib\shared\enums
+mkdir lib\shared\providers
+mkdir lib\shared\services
+
+echo. > lib\shared\models\user_model.dart
+echo. > lib\shared\models\order_model.dart
+echo. > lib\shared\models\product_model.dart
+
+# Main app files
+echo. > lib\app.dart
+echo. > lib\main.dart
+
+# Final message
+echo "========================================="
+echo "PROJECT IMEMALIZA KUUUNDWA!"
+echo "========================================="
+echo ""
+echo "Jumla ya folders: 52"
+echo "Jumla ya screen files: 45"
+echo ""
+echo "Next steps:"
+echo "1. Fungua project kwenye VS Code / Android Studio"
+echo "2. Endelea na lib/main.dart"
+echo "3. Anza kuunda UI kwa kipande cha kwanza (Auth)"
+```
+
+**Baada ya kipande hiki (MWISHO):**
+```
+lib/shared/
+├── models/
+│   ├── user_model.dart
+│   ├── order_model.dart
+│   └── product_model.dart
+├── enums/
+├── providers/
+└── services/
+
+lib/app.dart
+lib/main.dart
+```
+
+---
+
+## ✅ **MUHTASARI WA VIPANDE VYOTE**
+
+| Kipande | Content | Amri za Kutumia |
+|---------|---------|-----------------|
+| 1 | Mwanzo wa project | `flutter create` + folders 4 |
+| 2 | Core folder | `mkdir` 6 subfolders |
+| 3 | Config folder | `mkdir routes` + files 2 |
+| 4 | Auth module | `mkdir` 4 folders + screens 5 |
+| 5 | Customer (Home/Orders) | `mkdir` 4 folders + screens 6 |
+| 6 | Customer (Location/Profile) | `mkdir` 3 folders + screens 6 |
+| 7 | Delivery (Dashboard/Orders) | `mkdir` 4 folders + screens 7 |
+| 8 | Delivery (Earnings/Profile) | `mkdir` 2 folders + screens 6 |
+| 9 | Admin module | `mkdir` 6 folders + screens 11 |
+| 10 | Shared & Main files | `mkdir` 4 folders + files 5 |
+
+---
+
+## 🚀 **Jinsi ya Kutumia**
+
+1. **Anza na Kipande 1** → endelea hadi Kipande 10
+2. Kila kipande una **amri za CMD** (Windows) au **Bash** (Mac/Linux)
+3. Baada ya kumaliza kipande, **check kama folders zipo**
+4. Kisha **endelea na kipande kinachofuata**
+
+**Tayari kuanza? Nakupa Kipande cha 1 cha kuanzia!** 🎯
