@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
+import 'package:water_delivery_app/shared/services/water_service.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -11,32 +12,36 @@ class CustomerHomeScreen extends StatefulWidget {
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   int _selectedIndex = 0;
-  final List<WaterProduct> _featuredProducts = [
-    WaterProduct(
-      id: '1',
-      name: 'Pure Mineral Water',
-      size: '5 Liters',
-      price: 2500,
-      image: Icons.water_drop,
-      rating: 4.8,
-    ),
-    WaterProduct(
-      id: '2',
-      name: 'Alkaline Water',
-      size: '10 Liters',
-      price: 4500,
-      image: Icons.water,
-      rating: 4.9,
-    ),
-    WaterProduct(
-      id: '3',
-      name: 'Spring Water',
-      size: '18.9 Liters',
-      price: 8000,
-      image: Icons.local_drink,
-      rating: 4.7,
-    ),
-  ];
+  List<WaterType> _featuredProducts = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFeaturedProducts();
+  }
+
+  Future<void> _loadFeaturedProducts() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final waterTypes = await WaterService.getWaterTypes();
+      
+      setState(() {
+        _featuredProducts = waterTypes.take(3).toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,6 +255,49 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildFeaturedProducts() {
+    if (_isLoading) {
+      return const SizedBox(
+        height: 220,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null) {
+      return SizedBox(
+        height: 220,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, color: AppColors.grey),
+              const SizedBox(height: 8),
+              Text('Failed to load products', style: TextStyle(color: AppColors.grey)),
+              TextButton(
+                onPressed: _loadFeaturedProducts,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_featuredProducts.isEmpty) {
+      return SizedBox(
+        height: 220,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.water_drop, color: AppColors.grey),
+              const SizedBox(height: 8),
+              Text('No products available', style: TextStyle(color: AppColors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 220,
       child: ListView.builder(
@@ -285,7 +333,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                   child: Center(
                     child: Icon(
-                      product.image,
+                      product.bottleType == 'glass' ? Icons.opacity : Icons.water_drop,
                       size: 60,
                       color: AppColors.primary,
                     ),
@@ -314,41 +362,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'TZS ${product.price}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  size: 12,
-                                  color: Colors.orange,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  product.rating.toString(),
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'TZS ${product.price.toInt()}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -488,23 +507,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 }
 
-class WaterProduct {
-  final String id;
-  final String name;
-  final String size;
-  final double price;
-  final IconData image;
-  final double rating;
-
-  WaterProduct({
-    required this.id,
-    required this.name,
-    required this.size,
-    required this.price,
-    required this.image,
-    required this.rating,
-  });
-}
 
 class Category {
   final String name;

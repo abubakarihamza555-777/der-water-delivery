@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
+import 'package:water_delivery_app/shared/services/water_service.dart';
+import 'package:water_delivery_app/config/environment.dart';
 
 class WaterSelectionScreen extends StatefulWidget {
   const WaterSelectionScreen({super.key});
@@ -12,64 +14,46 @@ class WaterSelectionScreen extends StatefulWidget {
 class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
   String _selectedCategory = 'Bottles';
   final List<String> _categories = ['Bottles', 'Tanks'];
-  
-  // Bottle products (10L, 20L)
-  final List<WaterProduct> _bottleProducts = [
-    WaterProduct(
-      id: 'bottle_1',
-      name: 'Fresh Pure Water',
-      size: '10 Liters',
-      price: 3000,
-      image: Icons.water_drop,
-      description: 'Clean, fresh drinking water in 10L bottle',
-      unit: 'bottle',
-    ),
-    WaterProduct(
-      id: 'bottle_2',
-      name: 'Fresh Pure Water',
-      size: '20 Liters',
-      price: 5000,
-      image: Icons.local_drink,
-      description: 'Clean, fresh drinking water in 20L bottle',
-      unit: 'bottle',
-    ),
-  ];
-  
-  // Tank products (1000L, 2000L, 5000L)
-  final List<WaterProduct> _tankProducts = [
-    WaterProduct(
-      id: 'tank_1',
-      name: 'Bulk Water Tank',
-      size: '1,000 Liters',
-      price: 150000,
-      image: Icons.opacity,
-      description: 'Large water tank suitable for households',
-      unit: 'tank',
-    ),
-    WaterProduct(
-      id: 'tank_2',
-      name: 'Bulk Water Tank',
-      size: '2,000 Liters',
-      price: 280000,
-      image: Icons.water,
-      description: 'Perfect for apartments and small businesses',
-      unit: 'tank',
-    ),
-    WaterProduct(
-      id: 'tank_3',
-      name: 'Bulk Water Tank',
-      size: '5,000 Liters',
-      price: 650000,
-      image: Icons.water_sharp,
-      description: 'Ideal for commercial use and large families',
-      unit: 'tank',
-    ),
-  ];
+
+  List<WaterType> _waterTypes = [];
+  List<WaterType> _bottleProducts = [];
+  List<WaterType> _tankProducts = [];
+  bool _isLoading = true;
+  String? _error;
 
   final Map<String, int> _cartItems = {};
 
+  @override
+  void initState() {
+    super.initState();
+    _loadWaterTypes();
+  }
+
+  Future<void> _loadWaterTypes() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final waterTypes = await WaterService.getWaterTypes();
+
+      setState(() {
+        _waterTypes = waterTypes;
+        _bottleProducts = waterTypes.where((type) => type.category == 'Bottles').toList();
+        _tankProducts = waterTypes.where((type) => type.category == 'Tanks').toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
   // Get products based on selected category
-  List<WaterProduct> get _displayedProducts {
+  List<WaterType> get _displayedProducts {
     return _selectedCategory == 'Bottles' ? _bottleProducts : _tankProducts;
   }
 
@@ -168,21 +152,92 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
           
           // Products grid
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: _displayedProducts.length,
-              itemBuilder: (context, index) {
-                final product = _displayedProducts[index];
-                final quantity = _cartItems[product.id] ?? 0;
-                return _buildProductCard(product, quantity);
-              },
-            ),
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : _error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: AppColors.grey,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load water types',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _error!,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.grey,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadWaterTypes,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _displayedProducts.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.water_drop,
+                                  size: 64,
+                                  color: AppColors.grey,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No water types available',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Please check back later or contact support',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        : GridView.builder(
+                            padding: const EdgeInsets.all(16),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.75,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                            itemCount: _displayedProducts.length,
+                            itemBuilder: (context, index) {
+                              final product = _displayedProducts[index];
+                              final quantity = _cartItems[product.id] ?? 0;
+                              return _buildProductCard(product, quantity);
+                            },
+                          ),
           ),
         ],
       ),
@@ -217,7 +272,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
     );
   }
 
-  Widget _buildProductCard(WaterProduct product, int quantity) {
+  Widget _buildProductCard(WaterType product, int quantity) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -246,7 +301,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
               ),
               child: Center(
                 child: Icon(
-                  product.image,
+                  product.bottleType == 'glass' ? Icons.opacity : Icons.water_drop,
                   size: 60,
                   color: AppColors.primary,
                 ),
@@ -296,7 +351,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
                           ),
                           if (product.unit == 'tank')
                             Text(
-                              '≈ TZS ${_formatPrice(product.price ~/ (product.size.contains('1,000') ? 1000 : 2000))}/liter',
+                              '≈ TZS ${_formatPrice((product.price / product.volumeLiters).toInt())}/liter',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.grey,
@@ -397,24 +452,4 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
     }
     return price.toString();
   }
-}
-
-class WaterProduct {
-  final String id;
-  final String name;
-  final String size;
-  final int price;
-  final IconData image;
-  final String description;
-  final String unit; // 'bottle' or 'tank'
-
-  WaterProduct({
-    required this.id,
-    required this.name,
-    required this.size,
-    required this.price,
-    required this.image,
-    required this.description,
-    required this.unit,
-  });
 }

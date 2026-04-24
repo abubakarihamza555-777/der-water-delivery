@@ -8,7 +8,7 @@ class EnvironmentConfig {
   static bool get isProfile => kProfileMode;
 
   // Environment flags
-  static bool get useMockData => isDevelopment;
+  static bool get useMockData => false; // Always use live database for production
   static bool get logNetworkCalls => isDevelopment;
   static bool get logAnalytics => isProduction;
 
