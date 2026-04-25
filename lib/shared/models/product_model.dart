@@ -1,7 +1,7 @@
 class ProductModel {
   final String id;
   final String name;
-  final String category; // bottle, tank
+  final String category; // water_bottle, storage_tank
   final String size;
   final int price;
   final String? description;
@@ -29,7 +29,7 @@ class ProductModel {
     return ProductModel(
       id: json['id'] ?? json['_id'] ?? '',
       name: json['name'] ?? '',
-      category: json['category'] ?? 'bottle',
+      category: json['category'] ?? 'water_bottle',
       size: json['size'] ?? '',
       price: json['price'] ?? 0,
       description: json['description'],
@@ -57,8 +57,9 @@ class ProductModel {
     };
   }
 
-  bool get isBottle => category == 'bottle';
-  bool get isTank => category == 'tank';
+  bool get isWaterBottle => category == 'water_bottle';
+  bool get isStorageTank => category == 'storage_tank';
+  String get waterType => 'Fresh Water'; // All products are fresh water
   
   String get formattedPrice {
     if (price >= 1000000) {

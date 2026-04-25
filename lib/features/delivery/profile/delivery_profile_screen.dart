@@ -1,12 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
+import 'package:water_delivery_app/core/services/supabase_service.dart';
+import 'package:water_delivery_app/shared/models/user_model.dart';
 
-class DeliveryProfileScreen extends StatelessWidget {
+class DeliveryProfileScreen extends StatefulWidget {
   const DeliveryProfileScreen({super.key});
 
   @override
+  State<DeliveryProfileScreen> createState() => _DeliveryProfileScreenState();
+}
+
+class _DeliveryProfileScreenState extends State<DeliveryProfileScreen> {
+  UserModel? _currentUser;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final userResponse = await SupabaseService.getCurrentUser();
+      if (userResponse['success']) {
+        setState(() {
+          _currentUser = userResponse['user'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -58,9 +100,9 @@ class DeliveryProfileScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'John Driver',
-                    style: TextStyle(
+                  Text(
+                    _currentUser?.name ?? 'Delivery Partner',
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -128,12 +170,12 @@ class DeliveryProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  _buildInfoTile('Full Name', 'John Driver', Icons.person),
-                  _buildInfoTile('Email', 'john.driver@example.com', Icons.email),
-                  _buildInfoTile('Phone', '+255 712 345 678', Icons.phone),
-                  _buildInfoTile('Vehicle Type', 'Motorcycle', Icons.motorcycle),
-                  _buildInfoTile('License Plate', 'T 123 ABC', Icons.local_shipping),
-                  _buildInfoTile('Zone', 'Zone A - Kinondoni', Icons.location_on),
+                  _buildInfoTile('Full Name', _currentUser?.name ?? 'Not set', Icons.person),
+                  _buildInfoTile('Email', _currentUser?.email ?? 'Not set', Icons.email),
+                  _buildInfoTile('Phone', _currentUser?.phone ?? 'Not set', Icons.phone),
+                  _buildInfoTile('Vehicle Type', _currentUser?.deliveryInfo?['vehicle_type']?.toString() ?? 'Not set', Icons.motorcycle),
+                  _buildInfoTile('License Plate', _currentUser?.deliveryInfo?['license_plate']?.toString() ?? 'Not set', Icons.local_shipping),
+                  _buildInfoTile('Zone', 'Available for assignment', Icons.location_on),
                 ],
               ),
             ),

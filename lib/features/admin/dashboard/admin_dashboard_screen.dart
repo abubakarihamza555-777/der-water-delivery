@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
+import 'package:water_delivery_app/core/services/supabase_service.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -11,23 +12,78 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   int _selectedIndex = 0;
-  
-  final List<DashboardStat> _stats = [
-    DashboardStat('Total Users', '1,245', Icons.people, Colors.blue, '+12%'),
-    DashboardStat('Delivery Partners', '48', Icons.delivery_dining, Colors.green, '+5%'),
-    DashboardStat('Total Orders', '3,892', Icons.shopping_bag, Colors.orange, '+18%'),
-    DashboardStat('Revenue', 'TZS 28.4M', Icons.money, Colors.purple, '+22%'),
-  ];
+  bool _isLoading = true;
+  List<DashboardStat> _stats = [];
+  List<RecentOrder> _recentOrders = [];
 
-  final List<RecentOrder> _recentOrders = [
-    RecentOrder('ORD-12345', 'John Doe', 'TZS 12,000', 'Delivered', Colors.green),
-    RecentOrder('ORD-12346', 'Jane Smith', 'TZS 150,000', 'Processing', Colors.orange),
-    RecentOrder('ORD-12347', 'Robert Johnson', 'TZS 5,000', 'Pending', Colors.red),
-    RecentOrder('ORD-12348', 'Sarah Williams', 'TZS 25,000', 'Delivered', Colors.green),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      // Load stats
+      final usersData = await SupabaseService.fetch('users');
+      final ordersData = await SupabaseService.fetch('orders');
+      final deliveriesData = await SupabaseService.fetch('deliveries');
+
+      int totalUsers = usersData.length;
+      int deliveryPartners = usersData.where((u) => u['role'] == 'delivery').length;
+      int totalOrders = ordersData.length;
+      double revenue = ordersData.fold(0.0, (sum, order) => 
+        sum + (order['total_amount'] as num).toDouble());
+
+      setState(() {
+        _stats = [
+          DashboardStat('Total Users', '$totalUsers', Icons.people, Colors.blue, '+0%'),
+          DashboardStat('Delivery Partners', '$deliveryPartners', Icons.delivery_dining, Colors.green, '+0%'),
+          DashboardStat('Total Orders', '$totalOrders', Icons.shopping_bag, Colors.orange, '+0%'),
+          DashboardStat('Revenue', 'TZS ${revenue.toInt()}', Icons.money, Colors.purple, '+0%'),
+        ];
+
+        // Load recent orders
+        _recentOrders = ordersData.take(5).map((order) => RecentOrder(
+          order['order_number'] ?? 'Unknown',
+          order['customer_name'] ?? 'Unknown Customer',
+          'TZS ${order['total_amount'] ?? '0'}',
+          order['status'] ?? 'Unknown',
+          _getStatusColor(order['status']),
+        )).toList();
+
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'delivered':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'cancelled':
+        return Colors.red;
+      case 'out_for_delivery':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(

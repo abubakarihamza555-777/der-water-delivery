@@ -58,8 +58,9 @@ class WaterType {
 
   // Helper getters
   String get size => '$volumeLiters Liters';
-  String get unit => bottleType == 'glass' ? 'tank' : 'bottle';
-  String get category => volumeLiters >= 1000 ? 'Tanks' : 'Bottles';
+  String get unit => bottleType == 'tank' ? 'Tank' : 'Bottle';
+  String get category => volumeLiters >= 1000 ? 'Storage Tanks' : 'Water Bottles';
+  String get waterType => 'Fresh Water'; // All water is fresh water
 }
 
 class WaterService {
@@ -102,9 +103,9 @@ class WaterService {
     try {
       final allTypes = await getWaterTypes();
       
-      if (category == 'Bottles') {
+      if (category == 'Water Bottles') {
         return allTypes.where((type) => type.volumeLiters < 1000).toList();
-      } else if (category == 'Tanks') {
+      } else if (category == 'Storage Tanks') {
         return allTypes.where((type) => type.volumeLiters >= 1000).toList();
       }
       

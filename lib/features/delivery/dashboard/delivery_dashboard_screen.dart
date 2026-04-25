@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
+import 'package:water_delivery_app/core/services/supabase_service.dart';
+import 'package:water_delivery_app/shared/models/user_model.dart';
 
 class DeliveryDashboardScreen extends StatefulWidget {
   const DeliveryDashboardScreen({super.key});
@@ -11,17 +13,75 @@ class DeliveryDashboardScreen extends StatefulWidget {
 
 class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   int _selectedIndex = 0;
-  final bool _isOnline = true;
+  bool _isLoading = true;
+  bool _isOnline = true;
+  UserModel? _currentUser;
+  List<DashboardCard> _stats = [];
   
-  final List<DashboardCard> _stats = [
-    DashboardCard('Today\'s Earnings', 'TZS 45,000', Icons.money, Colors.green),
-    DashboardCard('Completed Orders', '12', Icons.check_circle, Colors.blue),
-    DashboardCard('Active Orders', '2', Icons.delivery_dining, Colors.orange),
-    DashboardCard('Rating', '4.8 ⭐', Icons.star, Colors.amber),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      // Get current user
+      final userResponse = await SupabaseService.getCurrentUser();
+      if (userResponse['success']) {
+        _currentUser = userResponse['user'];
+      }
+
+      // Get delivery stats
+      final deliveriesData = await SupabaseService.fetch(
+        'deliveries',
+        filters: _currentUser != null ? [
+          Filter('delivery_partner_id', 'eq', _currentUser!.id),
+        ] : null,
+      );
+
+      // Calculate stats
+      int completedOrders = deliveriesData.where((d) => d['status'] == 'delivered').length;
+      int activeOrders = deliveriesData.where((d) => 
+        ['assigned', 'picked_up', 'in_transit'].contains(d['status'])).length;
+      double todayEarnings = deliveriesData
+        .where((d) => 
+          d['status'] == 'delivered' && 
+          DateTime.parse(d['delivered_at'] ?? '1970-01-01').day == DateTime.now().day)
+        .fold(0.0, (sum, d) => sum + (d['net_earnings'] as num? ?? 0));
+      
+      double rating = _currentUser?.deliveryInfo?['rating']?.toDouble() ?? 0.0;
+
+      setState(() {
+        _stats = [
+          DashboardCard('Today\'s Earnings', 'TZS ${todayEarnings.toInt()}', Icons.money, Colors.green),
+          DashboardCard('Completed Orders', '$completedOrders', Icons.check_circle, Colors.blue),
+          DashboardCard('Active Orders', '$activeOrders', Icons.delivery_dining, Colors.orange),
+          DashboardCard('Rating', '${rating.toStringAsFixed(1)} ⭐', Icons.star, Colors.amber),
+        ];
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _stats = [
+          DashboardCard('Today\'s Earnings', 'TZS 0', Icons.money, Colors.green),
+          DashboardCard('Completed Orders', '0', Icons.check_circle, Colors.blue),
+          DashboardCard('Active Orders', '0', Icons.delivery_dining, Colors.orange),
+          DashboardCard('Rating', '0.0 ⭐', Icons.star, Colors.amber),
+        ];
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -119,9 +179,9 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'John Driver',
-                style: TextStyle(
+              Text(
+                _currentUser?.name ?? 'Delivery Partner',
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -227,9 +287,9 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Order #ORD-12345',
-                style: TextStyle(
+              Text(
+                'No active orders',
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),

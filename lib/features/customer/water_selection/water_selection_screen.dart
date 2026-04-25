@@ -12,8 +12,8 @@ class WaterSelectionScreen extends StatefulWidget {
 }
 
 class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
-  String _selectedCategory = 'Bottles';
-  final List<String> _categories = ['Bottles', 'Tanks'];
+  String _selectedCategory = 'Water Bottles';
+  final List<String> _categories = ['Water Bottles', 'Storage Tanks'];
 
   List<WaterType> _waterTypes = [];
   List<WaterType> _bottleProducts = [];
@@ -40,8 +40,8 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
 
       setState(() {
         _waterTypes = waterTypes;
-        _bottleProducts = waterTypes.where((type) => type.category == 'Bottles').toList();
-        _tankProducts = waterTypes.where((type) => type.category == 'Tanks').toList();
+        _bottleProducts = waterTypes.where((type) => type.category == 'Water Bottles').toList();
+        _tankProducts = waterTypes.where((type) => type.category == 'Storage Tanks').toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -54,7 +54,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
 
   // Get products based on selected category
   List<WaterType> get _displayedProducts {
-    return _selectedCategory == 'Bottles' ? _bottleProducts : _tankProducts;
+    return _selectedCategory == 'Water Bottles' ? _bottleProducts : _tankProducts;
   }
 
   @override
@@ -62,7 +62,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Select Water'),
+        title: const Text('Select Fresh Water'),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -112,9 +112,9 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildCategoryToggle('Bottles'),
+                _buildCategoryToggle('Water Bottles'),
                 const SizedBox(width: 16),
-                _buildCategoryToggle('Tanks'),
+                _buildCategoryToggle('Storage Tanks'),
               ],
             ),
           ),
@@ -137,9 +137,9 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _selectedCategory == 'Bottles'
-                        ? 'Fresh pure drinking water delivered to your doorstep'
-                        : 'Bulk water delivery for tanks. Perfect for storage',
+                    _selectedCategory == 'Water Bottles'
+                        ? 'Fresh clean water in convenient bottles for daily use'
+                        : 'Fresh clean water in large tanks for storage and bulk use',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.primary,
@@ -342,7 +342,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'TZS ${_formatPrice(product.price)}',
+                            'TZS ${_formatPrice(product.price.toInt())}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,

@@ -1,12 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
+import 'package:water_delivery_app/core/services/supabase_service.dart';
+import 'package:water_delivery_app/shared/models/user_model.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  UserModel? _currentUser;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final userResponse = await SupabaseService.getCurrentUser();
+      if (userResponse['success']) {
+        setState(() {
+          _currentUser = userResponse['user'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -58,24 +100,24 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'John Doe',
-                    style: TextStyle(
+                  Text(
+                    _currentUser?.name ?? 'Guest User',
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'john.doe@example.com',
-                    style: TextStyle(
+                  Text(
+                    _currentUser?.email ?? 'No email',
+                    style: const TextStyle(
                       color: AppColors.grey,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    '+255 712 345 678',
-                    style: TextStyle(
+                  Text(
+                    _currentUser?.phone ?? 'No phone',
+                    style: const TextStyle(
                       color: AppColors.grey,
                     ),
                   ),
@@ -83,16 +125,35 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             
-            // Stats cards
-            Container(
-              margin: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  _buildStatCard('Total Orders', '24', Icons.shopping_bag),
-                  _buildStatCard('Total Spent', 'TZS 125K', Icons.money),
-                  _buildStatCard('Active', '1', Icons.local_drink),
-                ],
-              ),
+            // Stats cards - will be loaded dynamically
+            FutureBuilder(
+              future: _loadUserStats(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    margin: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        _buildStatCard('Total Orders', '...', Icons.shopping_bag),
+                        _buildStatCard('Total Spent', '...', Icons.money),
+                        _buildStatCard('Active', '...', Icons.local_drink),
+                      ],
+                    ),
+                  );
+                }
+                
+                final stats = snapshot.data ?? {'orders': 0, 'spent': 0, 'active': 0};
+                return Container(
+                  margin: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      _buildStatCard('Total Orders', '${stats['orders']}', Icons.shopping_bag),
+                      _buildStatCard('Total Spent', 'TZS ${stats['spent']}', Icons.money),
+                      _buildStatCard('Active', '${stats['active']}', Icons.local_drink),
+                    ],
+                  ),
+                );
+              },
             ),
             
             // Menu items
@@ -250,6 +311,38 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Future<Map<String, dynamic>> _loadUserStats() async {
+    if (_currentUser == null) {
+      return {'orders': 0, 'spent': 0, 'active': 0};
+    }
+
+    try {
+      // Get user orders
+      final ordersData = await SupabaseService.fetch(
+        'orders',
+        filters: [
+          Filter('customer_id', 'eq', _currentUser!.id),
+        ],
+      );
+
+      // Calculate stats
+      int totalOrders = ordersData.length;
+      double totalSpent = ordersData.fold(0.0, (sum, order) => 
+        sum + (order['total_amount'] as num).toDouble());
+      int activeOrders = ordersData.where((order) => 
+        ['pending', 'confirmed', 'preparing', 'out_for_delivery']
+        .contains(order['status'])).length;
+
+      return {
+        'orders': totalOrders,
+        'spent': totalSpent.toInt(),
+        'active': activeOrders,
+      };
+    } catch (e) {
+      return {'orders': 0, 'spent': 0, 'active': 0};
+    }
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -264,11 +357,8 @@ class ProfileScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRoutes.login,
-                (route) => false,
-              );
+              SupabaseService.signOut();
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
             child: const Text('Logout', style: TextStyle(color: Colors.red)),
           ),

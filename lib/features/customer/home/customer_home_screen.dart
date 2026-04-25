@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/config/routes/app_routes.dart';
 import 'package:water_delivery_app/shared/services/water_service.dart';
+import 'package:water_delivery_app/core/services/supabase_service.dart';
+import 'package:water_delivery_app/shared/models/user_model.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -15,21 +17,43 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   List<WaterType> _featuredProducts = [];
   bool _isLoading = true;
   String? _error;
+  UserModel? _currentUser;
+  List<Map<String, dynamic>> _recentOrders = [];
 
   @override
   void initState() {
     super.initState();
-    _loadFeaturedProducts();
+    _loadUserData();
   }
 
-  Future<void> _loadFeaturedProducts() async {
+  Future<void> _loadUserData() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
+      // Get current user
+      final userResponse = await SupabaseService.getCurrentUser();
+      if (userResponse['success']) {
+        _currentUser = userResponse['user'];
+      }
+
+      // Load featured products
       final waterTypes = await WaterService.getWaterTypes();
+      
+      // Load recent orders
+      if (_currentUser != null) {
+        final ordersData = await SupabaseService.fetch(
+          'orders',
+          filters: [
+            Filter('customer_id', 'eq', _currentUser!.id),
+          ],
+          orderBy: 'created_at desc',
+          limit: 3,
+        );
+        _recentOrders = ordersData;
+      }
       
       setState(() {
         _featuredProducts = waterTypes.take(3).toList();
@@ -43,12 +67,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     }
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Welcome back, John!'),
+        title: Text('Welcome back, ${_currentUser?.name ?? 'Guest'}!'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
@@ -166,7 +191,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Special Offer!',
+                  'Fresh Water Delivery',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -175,7 +200,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Get 20% off on first order',
+                  'Pure water delivered to your doorstep',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
@@ -189,7 +214,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    'Use Code: FIRST20',
+                    'Order Now',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -205,12 +230,17 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildCategories() {
-    final List<Category> categories = [
-      Category('5 Liters', Icons.water_drop),
-      Category('10 Liters', Icons.water),
-      Category('18.9 Liters', Icons.local_drink),
-      Category('Bottled', Icons.wine_bar),
-    ];
+    // Build categories dynamically from available water types
+    final Set<String> volumes = _featuredProducts.map((p) => '${p.volumeLiters}L').toSet();
+    final List<Category> categories = volumes.map((volume) {
+      IconData icon = Icons.water_drop;
+      if (volume.contains('20')) {
+        icon = Icons.local_drink;
+      } else if (volume.contains('10')) {
+        icon = Icons.water;
+      }
+      return Category(volume, icon);
+    }).take(4).toList();
 
     return SizedBox(
       height: 100,
@@ -273,7 +303,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               const SizedBox(height: 8),
               Text('Failed to load products', style: TextStyle(color: AppColors.grey)),
               TextButton(
-                onPressed: _loadFeaturedProducts,
+                onPressed: _loadUserData,
                 child: const Text('Retry'),
               ),
             ],
@@ -381,6 +411,49 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildRecentOrders() {
+    if (_recentOrders.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Recent Orders',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.shopping_bag_outlined, color: AppColors.grey, size: 48),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No orders yet',
+                    style: TextStyle(color: AppColors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Place your first order to get started',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -392,7 +465,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
+        ..._recentOrders.map((order) => Container(
+          margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.white,
@@ -412,20 +486,22 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Order #ORD-12345',
-                      style: TextStyle(
+                      'Order #${order['order_number'] ?? 'Unknown'}',
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      '2 x Pure Mineral Water • 5 Liters',
-                      style: TextStyle(
+                      'Water Delivery • ${order['created_at'] != null ? 
+                        DateTime.parse(order['created_at']).toString().substring(0, 10) : 
+                        'Unknown date'}',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.grey,
                       ),
@@ -436,9 +512,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
-                    'TZS 5,000',
-                    style: TextStyle(
+                  Text(
+                    'TZS ${order['total_amount']?.toString() ?? '0'}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
                     ),
@@ -450,14 +526,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.2),
+                      color: _getStatusColor(order['status']).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
-                      'Delivered',
+                    child: Text(
+                      '${order['status'] ?? 'Unknown'}',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Colors.green,
+                        color: _getStatusColor(order['status']),
                       ),
                     ),
                   ),
@@ -465,9 +541,24 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             ],
           ),
-        ),
+        )).toList(),
       ],
     );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'delivered':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'cancelled':
+        return Colors.red;
+      case 'out_for_delivery':
+        return Colors.blue;
+      default:
+        return AppColors.grey;
+    }
   }
 
   Widget _buildBottomNavigationBar() {

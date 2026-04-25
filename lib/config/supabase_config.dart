@@ -1,6 +1,6 @@
 class SupabaseConfig {
-  static const String supabaseUrl = 'https://fnqrpyidgshgrwseyvsu.supabase.co';
-  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZucXJweWlkZ3NoZ3J3c2V5dnN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MjE3NzQsImV4cCI6MjA5MjM5Nzc3NH0.eEj-3_60il4zC8HrmaHmZEPmKfvBQQx1i9lyU97DvGY';
+  static const String supabaseUrl = 'https://fqvdqspdqyfeblxgjozz.supabase.co';
+  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxdmRxc3BkcXlmZWJseGdqb3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDYyNjEsImV4cCI6MjA5MjYyMjI2MX0.EbUpbwbzsArIjmPHU7RVNVK6N9Fq9sUfmXCXbGuc4x0';
   
   // Database tables
   static const String usersTable = 'users';
@@ -14,7 +14,11 @@ class SupabaseConfig {
   static const String notificationsTable = 'notifications';
   static const String reviewsTable = 'reviews';
   static const String waterTypesTable = 'water_types';
-  static const String deliveryPartnersTable = 'delivery_partners';
+  static const String zoneAssignmentsTable = 'zone_assignments';
+  static const String withdrawalRequestsTable = 'withdrawal_requests';
+  static const String supportTicketsTable = 'support_tickets';
+  static const String promotionsTable = 'promotions';
+  static const String promotionUsageTable = 'promotion_usage';
   
   // Storage buckets
   static const String profileImagesBucket = 'profile-images';
