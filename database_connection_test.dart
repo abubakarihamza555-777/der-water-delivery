@@ -342,7 +342,7 @@ class DatabaseConnectionTest {
   }
 
   static void printTestSummary() {
-    print('\n' + '='*60);
+    print('\n${'='*60}');
     print('📊 DATABASE CONNECTION TEST SUMMARY');
     print('='*60);
 
@@ -359,7 +359,7 @@ class DatabaseConnectionTest {
       }
     });
 
-    print('\n' + '-'*60);
+    print('\n${'-'*60}');
     print('📈 RESULTS: $passCount PASS, $failCount FAIL');
     print('🎯 SUCCESS RATE: ${((passCount / (passCount + failCount)) * 100).toStringAsFixed(1)}%');
     print('-'*60);

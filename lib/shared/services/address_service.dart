@@ -1,73 +1,6 @@
 import 'package:water_delivery_app/core/services/supabase_service.dart';
 import 'package:water_delivery_app/config/supabase_config.dart';
-
-class Address {
-  final String id;
-  final String userId;
-  final String type;
-  final String name;
-  final String description;
-  final double latitude;
-  final double longitude;
-  final String landmark;
-  final bool isDefault;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  Address({
-    required this.id,
-    required this.userId,
-    required this.type,
-    required this.name,
-    required this.description,
-    required this.latitude,
-    required this.longitude,
-    this.landmark = '',
-    this.isDefault = false,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Address.fromJson(Map<String, dynamic> json) {
-    return Address(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      type: json['type'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
-      landmark: json['landmark'] as String? ?? '',
-      isDefault: json['is_default'] as bool? ?? false,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'type': type,
-      'name': name,
-      'description': description,
-      'latitude': latitude,
-      'longitude': longitude,
-      'landmark': landmark,
-      'is_default': isDefault,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-    };
-  }
-
-  String get fullAddress {
-    final parts = [description];
-    if (landmark.isNotEmpty) {
-      parts.add('Near $landmark');
-    }
-    return parts.join(', ');
-  }
-}
+import 'package:water_delivery_app/shared/models/address_model.dart';
 
 class AddressService {
   static Future<List<Address>> getUserAddresses(String userId) async {
@@ -128,11 +61,11 @@ class AddressService {
     required String description,
     required double latitude,
     required double longitude,
+    required String phone,
     String landmark = '',
     bool isDefault = false,
   }) async {
     try {
-      // If setting as default, unset other default addresses
       if (isDefault) {
         await _unsetDefaultAddresses(userId);
       }
@@ -144,6 +77,7 @@ class AddressService {
         'description': description,
         'latitude': latitude,
         'longitude': longitude,
+        'phone': phone,
         'landmark': landmark,
         'is_default': isDefault,
       };
@@ -159,7 +93,8 @@ class AddressService {
     }
   }
 
-  static Future<Address> updateAddress(String addressId, Map<String, dynamic> data) async {
+  static Future<Address> updateAddress(
+      String addressId, Map<String, dynamic> data) async {
     try {
       // If setting as default, unset other default addresses
       if (data['is_default'] == true) {
@@ -192,7 +127,8 @@ class AddressService {
     }
   }
 
-  static Future<Address> setDefaultAddress(String addressId, String userId) async {
+  static Future<Address> setDefaultAddress(
+      String addressId, String userId) async {
     try {
       // Unset all other default addresses
       await _unsetDefaultAddresses(userId);
@@ -215,7 +151,7 @@ class AddressService {
     try {
       // Get all addresses for the user
       final addresses = await getUserAddresses(userId);
-      
+
       // Unset default for all addresses
       for (final address in addresses) {
         if (address.isDefault) {
@@ -233,7 +169,8 @@ class AddressService {
     }
   }
 
-  static Future<List<Address>> getAddressesByType(String userId, String type) async {
+  static Future<List<Address>> getAddressesByType(
+      String userId, String type) async {
     try {
       final data = await SupabaseService.fetch(
         SupabaseConfig.addressesTable,
@@ -250,15 +187,16 @@ class AddressService {
     }
   }
 
-  static Future<bool> isAddressInDeliveryZone(double latitude, double longitude) async {
+  static Future<bool> isAddressInDeliveryZone(
+      double latitude, double longitude) async {
     try {
       // This would typically involve checking against the zones table
       // For now, we'll return true as a placeholder
       // In a real implementation, you would query the zones table using PostGIS
-      
+
       // Example query (would need to be implemented in SupabaseService):
       // SELECT * FROM zones WHERE ST_Contains(area_boundary, ST_MakePoint(?, ?))
-      
+
       return true;
     } catch (e) {
       throw Exception('Failed to check delivery zone: $e');

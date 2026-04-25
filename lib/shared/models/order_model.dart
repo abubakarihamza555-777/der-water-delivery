@@ -1,166 +1,126 @@
-import 'package:water_delivery_app/shared/models/user_model.dart';
+import 'package:flutter/material.dart';
 
-class OrderModel {
+class Order {
   final String id;
+  final String orderNumber;
   final String customerId;
   final String? deliveryPartnerId;
-  final List<OrderItem> items;
-  final Address deliveryAddress;
   final OrderStatus status;
-  final PaymentMethod paymentMethod;
   final PaymentStatus paymentStatus;
-  final int subtotal;
-  final int deliveryFee;
-  final int discount;
-  final int total;
+  final double subtotal;
+  final double deliveryFee;
+  final double taxAmount;
+  final double discountAmount;
+  final double totalAmount;
+  final String? deliveryAddressId;
   final String? notes;
   final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
+  final DateTime? confirmedAt;
   final DateTime? deliveredAt;
-  final double? deliveryDistance;
-  final String? estimatedDeliveryTime;
+  final List<OrderItem> items;
 
-  OrderModel({
+  Order({
     required this.id,
+    required this.orderNumber,
     required this.customerId,
     this.deliveryPartnerId,
-    required this.items,
-    required this.deliveryAddress,
     required this.status,
-    required this.paymentMethod,
     required this.paymentStatus,
     required this.subtotal,
     required this.deliveryFee,
-    required this.discount,
-    required this.total,
+    required this.taxAmount,
+    required this.discountAmount,
+    required this.totalAmount,
+    this.deliveryAddressId,
     this.notes,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
+    this.confirmedAt,
     this.deliveredAt,
-    this.deliveryDistance,
-    this.estimatedDeliveryTime,
+    required this.items,
   });
 
-  factory OrderModel.fromJson(Map<String, dynamic> json) {
-    return OrderModel(
-      id: json['id'] ?? json['_id'] ?? '',
-      customerId: json['customerId'] ?? '',
-      deliveryPartnerId: json['deliveryPartnerId'],
-      items: (json['items'] as List? ?? [])
-          .map((item) => OrderItem.fromJson(item))
-          .toList(),
-      deliveryAddress: Address.fromJson(json['deliveryAddress']),
-      status: OrderStatusExtension.fromString(json['status'] ?? 'pending'),
-      paymentMethod: PaymentMethodExtension.fromString(json['paymentMethod'] ?? 'cash'),
-      paymentStatus: PaymentStatusExtension.fromString(json['paymentStatus'] ?? 'pending'),
-      subtotal: json['subtotal'] ?? 0,
-      deliveryFee: json['deliveryFee'] ?? 0,
-      discount: json['discount'] ?? 0,
-      total: json['total'] ?? 0,
-      notes: json['notes'],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-      deliveredAt: json['deliveredAt'] != null ? DateTime.parse(json['deliveredAt']) : null,
-      deliveryDistance: json['deliveryDistance']?.toDouble(),
-      estimatedDeliveryTime: json['estimatedDeliveryTime'],
+  factory Order.fromJson(Map<String, dynamic> json, List<OrderItem> items) {
+    return Order(
+      id: json['id'] as String,
+      orderNumber: json['order_number'] as String,
+      customerId: json['customer_id'] as String,
+      deliveryPartnerId: json['delivery_partner_id'] as String?,
+      status: OrderStatusExtension.fromString(json['status'] as String),
+      paymentStatus:
+          PaymentStatusExtension.fromString(json['payment_status'] as String),
+      subtotal: (json['subtotal'] as num).toDouble(),
+      deliveryFee: (json['delivery_fee'] as num).toDouble(),
+      taxAmount: (json['tax_amount'] as num).toDouble(),
+      discountAmount: (json['discount_amount'] as num).toDouble(),
+      totalAmount: (json['total_amount'] as num).toDouble(),
+      deliveryAddressId: json['delivery_address_id'] as String?,
+      notes: json['notes'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      confirmedAt: json['confirmed_at'] != null
+          ? DateTime.parse(json['confirmed_at'])
+          : null,
+      deliveredAt: json['delivered_at'] != null
+          ? DateTime.parse(json['delivered_at'])
+          : null,
+      items: items,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'customerId': customerId,
-      'deliveryPartnerId': deliveryPartnerId,
-      'items': items.map((item) => item.toJson()).toList(),
-      'deliveryAddress': deliveryAddress.toJson(),
-      'status': status.value,
-      'paymentMethod': paymentMethod.value,
-      'paymentStatus': paymentStatus.value,
-      'subtotal': subtotal,
-      'deliveryFee': deliveryFee,
-      'discount': discount,
-      'total': total,
-      'notes': notes,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'deliveredAt': deliveredAt?.toIso8601String(),
-      'deliveryDistance': deliveryDistance,
-      'estimatedDeliveryTime': estimatedDeliveryTime,
-    };
-  }
-
-  bool get isPending => status == OrderStatus.pending;
-  bool get isProcessing => status == OrderStatus.processing;
-  bool get isOutForDelivery => status == OrderStatus.outForDelivery;
-  bool get isDelivered => status == OrderStatus.delivered;
-  bool get isCancelled => status == OrderStatus.cancelled;
-  bool get isPaid => paymentStatus == PaymentStatus.completed;
 }
 
 class OrderItem {
+  final String id;
+  final String orderId;
   final String productId;
-  final String name;
-  final String size;
+  final String productName;
+  final int volumeLiters;
+  final String bottleType;
   final int quantity;
-  final int price;
-  final String? imageUrl;
+  final double unitPrice;
+  final double totalPrice;
+  final DateTime createdAt;
 
   OrderItem({
+    required this.id,
+    required this.orderId,
     required this.productId,
-    required this.name,
-    required this.size,
+    required this.productName,
+    required this.volumeLiters,
+    required this.bottleType,
     required this.quantity,
-    required this.price,
-    this.imageUrl,
+    required this.unitPrice,
+    required this.totalPrice,
+    required this.createdAt,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      productId: json['productId'] ?? '',
-      name: json['name'] ?? '',
-      size: json['size'] ?? '',
-      quantity: json['quantity'] ?? 1,
-      price: json['price'] ?? 0,
-      imageUrl: json['imageUrl'],
+      id: json['id'] as String,
+      orderId: json['order_id'] as String,
+      productId: json['product_id'] as String,
+      productName: json['product_name'] as String,
+      volumeLiters: json['volume_liters'] as int,
+      bottleType: json['bottle_type'] as String,
+      quantity: json['quantity'] as int,
+      unitPrice: (json['unit_price'] as num).toDouble(),
+      totalPrice: (json['total_price'] as num).toDouble(),
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'productId': productId,
-      'name': name,
-      'size': size,
-      'quantity': quantity,
-      'price': price,
-      'imageUrl': imageUrl,
-    };
-  }
-
-  int get total => price * quantity;
 }
 
 enum OrderStatus {
   pending,
   confirmed,
-  processing,
+  preparing,
   outForDelivery,
   delivered,
-  cancelled,
+  cancelled
 }
 
-enum PaymentMethod {
-  cash,
-  card,
-  mobileMoney,
-}
-
-enum PaymentStatus {
-  pending,
-  processing,
-  completed,
-  failed,
-  refunded,
-}
+enum PaymentStatus { pending, processing, completed, failed, refunded }
 
 extension OrderStatusExtension on OrderStatus {
   String get value {
@@ -169,8 +129,8 @@ extension OrderStatusExtension on OrderStatus {
         return 'pending';
       case OrderStatus.confirmed:
         return 'confirmed';
-      case OrderStatus.processing:
-        return 'processing';
+      case OrderStatus.preparing:
+        return 'preparing';
       case OrderStatus.outForDelivery:
         return 'out_for_delivery';
       case OrderStatus.delivered:
@@ -184,8 +144,8 @@ extension OrderStatusExtension on OrderStatus {
     switch (value) {
       case 'confirmed':
         return OrderStatus.confirmed;
-      case 'processing':
-        return OrderStatus.processing;
+      case 'preparing':
+        return OrderStatus.preparing;
       case 'out_for_delivery':
         return OrderStatus.outForDelivery;
       case 'delivered':
@@ -203,8 +163,8 @@ extension OrderStatusExtension on OrderStatus {
         return 'Pending';
       case OrderStatus.confirmed:
         return 'Confirmed';
-      case OrderStatus.processing:
-        return 'Processing';
+      case OrderStatus.preparing:
+        return 'Preparing';
       case OrderStatus.outForDelivery:
         return 'Out for Delivery';
       case OrderStatus.delivered:
@@ -213,39 +173,21 @@ extension OrderStatusExtension on OrderStatus {
         return 'Cancelled';
     }
   }
-}
 
-extension PaymentMethodExtension on PaymentMethod {
-  String get value {
+  Color get color {
     switch (this) {
-      case PaymentMethod.cash:
-        return 'cash';
-      case PaymentMethod.card:
-        return 'card';
-      case PaymentMethod.mobileMoney:
-        return 'mobile_money';
-    }
-  }
-
-  static PaymentMethod fromString(String value) {
-    switch (value) {
-      case 'card':
-        return PaymentMethod.card;
-      case 'mobile_money':
-        return PaymentMethod.mobileMoney;
-      default:
-        return PaymentMethod.cash;
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case PaymentMethod.cash:
-        return 'Cash on Delivery';
-      case PaymentMethod.card:
-        return 'Credit/Debit Card';
-      case PaymentMethod.mobileMoney:
-        return 'Mobile Money';
+      case OrderStatus.pending:
+        return Colors.orange;
+      case OrderStatus.confirmed:
+        return Colors.blue;
+      case OrderStatus.preparing:
+        return Colors.purple;
+      case OrderStatus.outForDelivery:
+        return Colors.orange;
+      case OrderStatus.delivered:
+        return Colors.green;
+      case OrderStatus.cancelled:
+        return Colors.red;
     }
   }
 }
@@ -280,19 +222,4 @@ extension PaymentStatusExtension on PaymentStatus {
         return PaymentStatus.pending;
     }
   }
-
-  String get displayName {
-    switch (this) {
-      case PaymentStatus.pending:
-        return 'Pending';
-      case PaymentStatus.processing:
-        return 'Processing';
-      case PaymentStatus.completed:
-        return 'Completed';
-      case PaymentStatus.failed:
-        return 'Failed';
-      case PaymentStatus.refunded:
-        return 'Refunded';
-    }
-  }
-} 
+}

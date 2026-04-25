@@ -1,86 +1,67 @@
-class ProductModel {
+class Product {
   final String id;
   final String name;
-  final String category; // water_bottle, storage_tank
-  final String size;
-  final int price;
-  final String? description;
+  final int volumeLiters;
+  final String bottleType; // 'bottle' or 'tank'
+  final double price;
+  final double? discountPrice;
+  final bool isActive;
   final String? imageUrl;
-  final int stock;
-  final bool isAvailable;
+  final String? description;
+  final int stockQuantity;
+  final int maxOrderQuantity;
   final DateTime createdAt;
-  final Map<String, dynamic>? metadata;
+  final DateTime updatedAt;
 
-  ProductModel({
+  Product({
     required this.id,
     required this.name,
-    required this.category,
-    required this.size,
+    required this.volumeLiters,
+    required this.bottleType,
     required this.price,
-    this.description,
+    this.discountPrice,
+    this.isActive = true,
     this.imageUrl,
-    this.stock = 0,
-    this.isAvailable = true,
+    this.description,
+    this.stockQuantity = 0,
+    this.maxOrderQuantity = 20,
     required this.createdAt,
-    this.metadata,
+    required this.updatedAt,
   });
 
-  factory ProductModel.fromJson(Map<String, dynamic> json) {
-    return ProductModel(
-      id: json['id'] ?? json['_id'] ?? '',
-      name: json['name'] ?? '',
-      category: json['category'] ?? 'water_bottle',
-      size: json['size'] ?? '',
-      price: json['price'] ?? 0,
-      description: json['description'],
-      imageUrl: json['imageUrl'],
-      stock: json['stock'] ?? 0,
-      isAvailable: json['isAvailable'] ?? true,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      metadata: json['metadata'],
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      volumeLiters: json['volume_liters'] as int,
+      bottleType: json['bottle_type'] as String,
+      price: (json['price'] as num).toDouble(),
+      discountPrice: json['discount_price'] != null
+          ? (json['discount_price'] as num).toDouble()
+          : null,
+      isActive: json['is_active'] as bool? ?? true,
+      imageUrl: json['image_url'] as String?,
+      description: json['description'] as String?,
+      stockQuantity: json['stock_quantity'] as int? ?? 0,
+      maxOrderQuantity: json['max_order_quantity'] as int? ?? 20,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'category': category,
-      'size': size,
-      'price': price,
-      'description': description,
-      'imageUrl': imageUrl,
-      'stock': stock,
-      'isAvailable': isAvailable,
-      'createdAt': createdAt.toIso8601String(),
-      'metadata': metadata,
-    };
-  }
+  double get effectivePrice => discountPrice ?? price;
+  String get category => bottleType == 'tank' ? 'Water Tanks' : 'Water Bottles';
+  String get sizeLabel => '$volumeLiters Liters';
+  String get formattedPrice => 'TZS ${effectivePrice.toStringAsFixed(0)}';
 
-  bool get isWaterBottle => category == 'water_bottle';
-  bool get isStorageTank => category == 'storage_tank';
-  String get waterType => 'Fresh Water'; // All products are fresh water
-  
-  String get formattedPrice {
-    if (price >= 1000000) {
-      return 'TZS ${(price / 1000000).toStringAsFixed(1)}M';
-    } else if (price >= 1000) {
-      return 'TZS ${(price / 1000).toStringAsFixed(0)}K';
-    }
-    return 'TZS $price';
-  }
-  
-  int get pricePerLiter {
-    if (size.contains('Liter')) {
-      final liters = int.tryParse(size.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-      if (liters > 0) return price ~/ liters;
-    }
+  double get pricePerLiter {
+    if (volumeLiters > 0) return effectivePrice / volumeLiters;
     return 0;
   }
 }
 
 class CartItem {
-  final ProductModel product;
+  final Product product;
   int quantity;
 
   CartItem({
@@ -88,36 +69,17 @@ class CartItem {
     this.quantity = 1,
   });
 
-  int get totalPrice => product.price * quantity;
+  double get totalPrice => product.effectivePrice * quantity;
 
   Map<String, dynamic> toJson() {
     return {
-      'productId': product.id,
+      'product_id': product.id,
       'quantity': quantity,
-      'price': product.price,
+      'unit_price': product.effectivePrice,
+      'total_price': totalPrice,
+      'product_name': product.name,
+      'volume_liters': product.volumeLiters,
+      'bottle_type': product.bottleType,
     };
   }
 }
-
-class CategoryModel {
-  final String id;
-  final String name;
-  final String icon;
-  final int productCount;
-
-  CategoryModel({
-    required this.id,
-    required this.name,
-    required this.icon,
-    this.productCount = 0,
-  });
-
-  factory CategoryModel.fromJson(Map<String, dynamic> json) {
-    return CategoryModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      icon: json['icon'] ?? 'water_drop',
-      productCount: json['productCount'] ?? 0,
-    );
-  }
-} 

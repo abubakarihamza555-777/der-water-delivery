@@ -14,7 +14,7 @@ class DeliveryDashboardScreen extends StatefulWidget {
 class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   int _selectedIndex = 0;
   bool _isLoading = true;
-  bool _isOnline = true;
+  final bool _isOnline = true;
   UserModel? _currentUser;
   List<DashboardCard> _stats = [];
   
@@ -287,9 +287,9 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'No active orders',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),

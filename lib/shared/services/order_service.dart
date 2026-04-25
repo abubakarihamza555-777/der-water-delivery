@@ -1,84 +1,7 @@
 import 'package:water_delivery_app/core/services/supabase_service.dart';
 import 'package:water_delivery_app/config/supabase_config.dart';
-
-class Order {
-  final String id;
-  final String orderNumber;
-  final String customerId;
-  final String? deliveryPartnerId;
-  final String status;
-  final String paymentStatus;
-  final double totalAmount;
-  final String? deliveryAddressId;
-  final String? notes;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final List<OrderItem> items;
-
-  Order({
-    required this.id,
-    required this.orderNumber,
-    required this.customerId,
-    this.deliveryPartnerId,
-    required this.status,
-    required this.paymentStatus,
-    required this.totalAmount,
-    this.deliveryAddressId,
-    this.notes,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.items,
-  });
-
-  factory Order.fromJson(Map<String, dynamic> json, List<OrderItem> items) {
-    return Order(
-      id: json['id'] as String,
-      orderNumber: json['order_number'] as String,
-      customerId: json['customer_id'] as String,
-      deliveryPartnerId: json['delivery_partner_id'] as String?,
-      status: json['status'] as String,
-      paymentStatus: json['payment_status'] as String,
-      totalAmount: (json['total_amount'] as num).toDouble(),
-      deliveryAddressId: json['delivery_address_id'] as String?,
-      notes: json['notes'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      items: items,
-    );
-  }
-}
-
-class OrderItem {
-  final String id;
-  final String orderId;
-  final String waterTypeId;
-  final int quantity;
-  final double unitPrice;
-  final double totalPrice;
-  final DateTime createdAt;
-
-  OrderItem({
-    required this.id,
-    required this.orderId,
-    required this.waterTypeId,
-    required this.quantity,
-    required this.unitPrice,
-    required this.totalPrice,
-    required this.createdAt,
-  });
-
-  factory OrderItem.fromJson(Map<String, dynamic> json) {
-    return OrderItem(
-      id: json['id'] as String,
-      orderId: json['order_id'] as String,
-      waterTypeId: json['water_type_id'] as String,
-      quantity: json['quantity'] as int,
-      unitPrice: (json['unit_price'] as num).toDouble(),
-      totalPrice: (json['total_price'] as num).toDouble(),
-      createdAt: DateTime.parse(json['created_at'] as String),
-    );
-  }
-}
+import 'package:water_delivery_app/shared/models/order_model.dart';
+import 'package:water_delivery_app/shared/models/product_model.dart';
 
 class OrderService {
   static Future<List<Order>> getCustomerOrders(String customerId) async {
@@ -90,14 +13,15 @@ class OrderService {
       );
 
       List<Order> orders = [];
-      
+
       for (final orderData in ordersData) {
         final itemsData = await SupabaseService.fetch(
           SupabaseConfig.orderItemsTable,
           filters: [Filter('order_id', 'eq', orderData['id'])],
         );
-        
-        final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
+
+        final items =
+            itemsData.map((item) => OrderItem.fromJson(item)).toList();
         orders.add(Order.fromJson(orderData, items));
       }
 
@@ -107,7 +31,8 @@ class OrderService {
     }
   }
 
-  static Future<List<Order>> getDeliveryPartnerOrders(String deliveryPartnerId) async {
+  static Future<List<Order>> getDeliveryPartnerOrders(
+      String deliveryPartnerId) async {
     try {
       final ordersData = await SupabaseService.fetch(
         SupabaseConfig.ordersTable,
@@ -116,14 +41,15 @@ class OrderService {
       );
 
       List<Order> orders = [];
-      
+
       for (final orderData in ordersData) {
         final itemsData = await SupabaseService.fetch(
           SupabaseConfig.orderItemsTable,
           filters: [Filter('order_id', 'eq', orderData['id'])],
         );
-        
-        final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
+
+        final items =
+            itemsData.map((item) => OrderItem.fromJson(item)).toList();
         orders.add(Order.fromJson(orderData, items));
       }
 
@@ -141,14 +67,15 @@ class OrderService {
       );
 
       List<Order> orders = [];
-      
+
       for (final orderData in ordersData) {
         final itemsData = await SupabaseService.fetch(
           SupabaseConfig.orderItemsTable,
           filters: [Filter('order_id', 'eq', orderData['id'])],
         );
-        
-        final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
+
+        final items =
+            itemsData.map((item) => OrderItem.fromJson(item)).toList();
         orders.add(Order.fromJson(orderData, items));
       }
 
@@ -161,22 +88,25 @@ class OrderService {
   static Future<Order> createOrder({
     required String customerId,
     required String deliveryAddressId,
-    required List<Map<String, dynamic>> items,
+    required List<CartItem> cartItems,
+    required double deliveryFee,
+    double taxAmount = 0,
+    double discountAmount = 0,
     String? notes,
   }) async {
     try {
-      // Calculate total amount
-      double totalAmount = 0;
-      for (final item in items) {
-        totalAmount += (item['unit_price'] as num) * (item['quantity'] as int);
-      }
+      double subtotal = cartItems.fold(0, (sum, item) => sum + item.totalPrice);
+      double totalAmount = subtotal + deliveryFee + taxAmount - discountAmount;
 
-      // Create order
       final orderData = {
         'customer_id': customerId,
         'delivery_address_id': deliveryAddressId,
-        'status': 'pending',
-        'payment_status': 'pending',
+        'status': OrderStatus.pending.value,
+        'payment_status': PaymentStatus.pending.value,
+        'subtotal': subtotal,
+        'delivery_fee': deliveryFee,
+        'tax_amount': taxAmount,
+        'discount_amount': discountAmount,
         'total_amount': totalAmount,
         'notes': notes,
       };
@@ -187,13 +117,16 @@ class OrderService {
       );
 
       // Create order items
-      for (final item in items) {
+      for (final item in cartItems) {
         final itemData = {
           'order_id': createdOrder['id'],
-          'water_type_id': item['water_type_id'],
-          'quantity': item['quantity'],
-          'unit_price': item['unit_price'],
-          'total_price': (item['unit_price'] as num) * (item['quantity'] as int),
+          'product_id': item.product.id,
+          'product_name': item.product.name,
+          'volume_liters': item.product.volumeLiters,
+          'bottle_type': item.product.bottleType,
+          'quantity': item.quantity,
+          'unit_price': item.product.effectivePrice,
+          'total_price': item.totalPrice,
         };
 
         await SupabaseService.insert(
@@ -202,24 +135,32 @@ class OrderService {
         );
       }
 
-      // Fetch complete order with items
       final itemsData = await SupabaseService.fetch(
         SupabaseConfig.orderItemsTable,
         filters: [Filter('order_id', 'eq', createdOrder['id'])],
       );
-      
-      final orderItems = itemsData.map((item) => OrderItem.fromJson(item)).toList();
-      return Order.fromJson(createdOrder, orderItems);
+
+      final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
+      return Order.fromJson(createdOrder, items);
     } catch (e) {
       throw Exception('Failed to create order: $e');
     }
   }
 
-  static Future<Order> updateOrderStatus(String orderId, String status) async {
+  static Future<Order> updateOrderStatus(
+      String orderId, OrderStatus status) async {
     try {
+      final updateData = {'status': status.value};
+
+      if (status == OrderStatus.confirmed) {
+        updateData['confirmed_at'] = DateTime.now().toIso8601String();
+      } else if (status == OrderStatus.delivered) {
+        updateData['delivered_at'] = DateTime.now().toIso8601String();
+      }
+
       final updatedOrder = await SupabaseService.update(
         SupabaseConfig.ordersTable,
-        {'status': status},
+        updateData,
         'id',
         orderId,
       );
@@ -228,7 +169,7 @@ class OrderService {
         SupabaseConfig.orderItemsTable,
         filters: [Filter('order_id', 'eq', orderId)],
       );
-      
+
       final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
       return Order.fromJson(updatedOrder, items);
     } catch (e) {
@@ -236,7 +177,8 @@ class OrderService {
     }
   }
 
-  static Future<Order> assignDeliveryPartner(String orderId, String deliveryPartnerId) async {
+  static Future<Order> assignDeliveryPartner(
+      String orderId, String deliveryPartnerId) async {
     try {
       final updatedOrder = await SupabaseService.update(
         SupabaseConfig.ordersTable,
@@ -252,7 +194,7 @@ class OrderService {
         SupabaseConfig.orderItemsTable,
         filters: [Filter('order_id', 'eq', orderId)],
       );
-      
+
       final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
       return Order.fromJson(updatedOrder, items);
     } catch (e) {
@@ -275,7 +217,7 @@ class OrderService {
         SupabaseConfig.orderItemsTable,
         filters: [Filter('order_id', 'eq', orderId)],
       );
-      
+
       final items = itemsData.map((item) => OrderItem.fromJson(item)).toList();
       return Order.fromJson(orderData.first, items);
     } catch (e) {

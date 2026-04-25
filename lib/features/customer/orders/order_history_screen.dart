@@ -148,12 +148,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.shopping_bag_outlined, color: AppColors.grey, size: 64),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             'No orders found',
             style: TextStyle(
@@ -162,7 +162,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
               color: AppColors.grey,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             'Start ordering to see your order history',
             style: TextStyle(
@@ -281,9 +281,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   color: AppColors.grey,
                 ),
                 const SizedBox(width: 8),
-                Text(
+                const Text(
                   'Water Delivery',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppColors.grey,
                   ),

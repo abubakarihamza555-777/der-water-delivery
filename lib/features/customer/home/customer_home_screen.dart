@@ -299,9 +299,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: AppColors.grey),
+              const Icon(Icons.error_outline, color: AppColors.grey),
               const SizedBox(height: 8),
-              Text('Failed to load products', style: TextStyle(color: AppColors.grey)),
+              const Text('Failed to load products', style: TextStyle(color: AppColors.grey)),
               TextButton(
                 onPressed: _loadUserData,
                 child: const Text('Retry'),
@@ -313,14 +313,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     }
 
     if (_featuredProducts.isEmpty) {
-      return SizedBox(
+      return const SizedBox(
         height: 220,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.water_drop, color: AppColors.grey),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text('No products available', style: TextStyle(color: AppColors.grey)),
             ],
           ),
@@ -429,16 +429,16 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Center(
+            child: const Center(
               child: Column(
                 children: [
                   Icon(Icons.shopping_bag_outlined, color: AppColors.grey, size: 48),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'No orders yet',
                     style: TextStyle(color: AppColors.grey),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'Place your first order to get started',
                     style: TextStyle(
@@ -541,7 +541,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             ],
           ),
-        )).toList(),
+        )),
       ],
     );
   }
