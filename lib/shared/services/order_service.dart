@@ -93,6 +93,7 @@ class OrderService {
     double taxAmount = 0,
     double discountAmount = 0,
     String? notes,
+    DateTime? scheduledFor,
   }) async {
     try {
       double subtotal = cartItems.fold(0, (sum, item) => sum + item.totalPrice);
@@ -108,6 +109,8 @@ class OrderService {
         'tax_amount': taxAmount,
         'discount_amount': discountAmount,
         'total_amount': totalAmount,
+        'delivery_type': cartItems.first.product.deliveryType,
+        'scheduled_for': scheduledFor?.toIso8601String(),
         'notes': notes,
       };
 

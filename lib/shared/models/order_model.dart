@@ -13,6 +13,8 @@ class Order {
   final double discountAmount;
   final double totalAmount;
   final String? deliveryAddressId;
+  final String? deliveryType; // 'bulk' or 'container'
+  final DateTime? scheduledFor;
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -33,6 +35,8 @@ class Order {
     required this.discountAmount,
     required this.totalAmount,
     this.deliveryAddressId,
+    this.deliveryType,
+    this.scheduledFor,
     this.notes,
     required this.createdAt,
     required this.updatedAt,
@@ -56,6 +60,10 @@ class Order {
       discountAmount: (json['discount_amount'] as num).toDouble(),
       totalAmount: (json['total_amount'] as num).toDouble(),
       deliveryAddressId: json['delivery_address_id'] as String?,
+      deliveryType: json['delivery_type'] as String?,
+      scheduledFor: json['scheduled_for'] != null
+          ? DateTime.parse(json['scheduled_for'])
+          : null,
       notes: json['notes'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),

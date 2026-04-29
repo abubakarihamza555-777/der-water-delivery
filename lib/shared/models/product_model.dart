@@ -5,6 +5,9 @@ class Product {
   final String bottleType; // 'bottle' or 'tank'
   final double price;
   final double? discountPrice;
+  final double pricePerLiter;
+  final String deliveryType; // 'bulk' or 'container'
+  final double baseDeliveryFee;
   final bool isActive;
   final String? imageUrl;
   final String? description;
@@ -20,6 +23,9 @@ class Product {
     required this.bottleType,
     required this.price,
     this.discountPrice,
+    required this.pricePerLiter,
+    required this.deliveryType,
+    this.baseDeliveryFee = 0,
     this.isActive = true,
     this.imageUrl,
     this.description,
@@ -39,6 +45,9 @@ class Product {
       discountPrice: json['discount_price'] != null
           ? (json['discount_price'] as num).toDouble()
           : null,
+      pricePerLiter: (json['price_per_liter'] as num).toDouble(),
+      deliveryType: json['delivery_type'] as String? ?? 'container',
+      baseDeliveryFee: (json['base_delivery_fee'] as num?)?.toDouble() ?? 0,
       isActive: json['is_active'] as bool? ?? true,
       imageUrl: json['image_url'] as String?,
       description: json['description'] as String?,
@@ -50,14 +59,10 @@ class Product {
   }
 
   double get effectivePrice => discountPrice ?? price;
-  String get category => bottleType == 'tank' ? 'Water Tanks' : 'Water Bottles';
+  String get category => bottleType == 'tank' ? 'Tank' : 'Bottle';
   String get sizeLabel => '$volumeLiters Liters';
   String get formattedPrice => 'TZS ${effectivePrice.toStringAsFixed(0)}';
-
-  double get pricePerLiter {
-    if (volumeLiters > 0) return effectivePrice / volumeLiters;
-    return 0;
-  }
+  String get formattedPricePerLiter => 'TZS ${pricePerLiter.toStringAsFixed(0)} / L';
 }
 
 class CartItem {

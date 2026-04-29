@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:water_delivery_app/core/constants/app_colors.dart';
 import 'package:water_delivery_app/core/widgets/custom_button.dart';
+import 'package:water_delivery_app/config/routes/app_routes.dart';
 import 'package:water_delivery_app/shared/models/product_model.dart';
 import 'package:water_delivery_app/shared/services/product_service.dart';
 import 'package:water_delivery_app/shared/providers/cart_provider.dart';
@@ -72,7 +73,7 @@ class _WaterSelectionScreenState extends State<WaterSelectionScreen> {
               IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/cart');
+                  Navigator.pushNamed(context, AppRoutes.cart);
                 },
               ),
               if (cartItemCount > 0)

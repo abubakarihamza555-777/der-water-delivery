@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 import 'app_routes.dart';
 // Auth Screens
+import '../../features/auth/screens/forgot_password_screen.dart';
+import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/onboarding_screen.dart';
 import '../../features/auth/screens/language_screen.dart';
 // Customer Screens
-import '../../features/customer/home/customer_home_screen.dart';
+import '../../features/customer/screens/customer_home_screen_final.dart';
+import '../../features/customer/screens/bulk_water_order_screen.dart';
+import '../../features/customer/screens/containers_order_screen.dart';
+import '../../features/customer/screens/order_tracking_screen_new.dart';
+import '../../features/customer/screens/order_history_screen_new.dart';
+import '../../features/customer/screens/profile_screen_new.dart';
 import '../../features/customer/water_selection/water_selection_screen.dart';
 import '../../features/customer/checkout/checkout_screen.dart';
-import '../../features/customer/orders/order_tracking_screen.dart';
+import '../../features/customer/cart/cart_screen.dart';
 import '../../features/customer/orders/order_details_screen.dart';
-import '../../features/customer/orders/order_history_screen.dart';
-import '../../features/customer/profile/profile_screen.dart';
 import '../../features/customer/profile/settings_screen.dart';
 import '../../features/customer/notifications/notifications_screen.dart';
 import '../../features/customer/location/saved_addresses_screen.dart';
 import '../../features/customer/location/map_picker_screen.dart';
 import '../../features/customer/location/address_form_screen.dart';
 // Delivery Screens
-import '../../features/delivery/dashboard/delivery_dashboard_screen.dart';
+import '../../features/delivery/dashboard/delivery_dashboard_screen_new.dart';
 import '../../features/delivery/dashboard/online_status_screen.dart';
 import '../../features/delivery/orders/incoming_orders_screen.dart';
 import '../../features/delivery/orders/active_delivery_screen.dart';
@@ -71,12 +76,21 @@ class RouteGenerator {
       case AppRoutes.register:
         return _buildRoute(const RegisterScreen());
 
+      case AppRoutes.forgotPassword:
+        return _buildRoute(const ForgotPasswordScreen());
+
+      case AppRoutes.resetPassword:
+        return _buildRoute(const ResetPasswordScreen());
+
       // Customer Routes
       case AppRoutes.customerHome:
         return _buildRoute(const CustomerHomeScreen());
 
       case AppRoutes.waterSelection:
         return _buildRoute(const WaterSelectionScreen());
+
+      case AppRoutes.cart:
+        return _buildRoute(const CartScreen());
 
       case AppRoutes.checkout:
         return _buildRoute(const CheckoutScreen());
@@ -95,6 +109,13 @@ class RouteGenerator {
 
       case AppRoutes.customerSettings:
         return _buildRoute(const SettingsScreen());
+
+      // New Custom Routes
+      case '/bulk-water-order':
+        return _buildRoute(const BulkWaterOrderScreen());
+
+      case '/containers-order':
+        return _buildRoute(const ContainersOrderScreen());
 
       case AppRoutes.notifications:
         return _buildRoute(const NotificationsScreen());
